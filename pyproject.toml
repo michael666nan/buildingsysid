@@ -2,13 +2,16 @@
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+license-files = [ "LICENSE.txt" ]
+
 [project]
 name = "buildingsysid"
-version = "0.1.0"
+version = "0.1.1"
 description = "System identification tools for building models"
 readme = "README.md"
 authors = [{name = "Michael Dahl Knudsen", email = "mdk@cae.au.dk"}]
-license = {file = "LICENSE"}
+license = {text = "MIT"}
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -24,5 +27,5 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/mussesmil/buildingsysid"
-"Bug Tracker" = "https://github.com/mussesmil/buildingsysid/issues"
+"Homepage" = "https://github.com/michael666nan/buildingsysid"
+"Bug Tracker" = "https://github.com/michael666nan/buildingsysid/issues"
