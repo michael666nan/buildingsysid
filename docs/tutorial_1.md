@@ -1,5 +1,4 @@
-# Black-Box System Identification for Building Thermal Modeling
-## Theory and Practice with the BuildingSysID Library
+# Tutorial 1: Black-Box System Identification for Building Thermal Modeling
 
 ## Table of Contents
 1. [Introduction to System Identification](#introduction-to-system-identification)
@@ -15,18 +14,17 @@
 
 ## Introduction to System Identification
 
-System identification is the process of developing mathematical models of dynamic systems based on observed input and output data. Unlike simulation, which predicts outputs from inputs using known models, system identification works backward—deriving the model from measured inputs and outputs.
+System identification is the process of developing mathematical models of dynamic systems based on observed input and output data.
 
 ### Key Concepts:
 
-- **System**: A process that transforms inputs into outputs according to some rules
-- **Model**: A mathematical representation of the system's behavior
+- **System**: In this example an EnergyPlus model of a single room is the underlying unknown process that generates the data 
+- **Model**: A linear time-invariant state-space model is the mathematical representation we use to describe the system's behavior
 - **Identification**: The process of determining model parameters from data
 - **Validation**: Testing if the model accurately predicts system behavior
 
-![System Identification Process](https://i.imgur.com/placeholder.png)
 
-## Black-Box Models vs. White-Box Models
+## Black-Box Models vs. White-Box and Grey-Box Models
 
 ### White-Box Models:
 - Based on physical laws and first principles
@@ -59,7 +57,7 @@ The models used in our example are Linear Time-Invariant (LTI) systems, which me
 - **Time-Invariant**: The system's response doesn't change over time
 
 For building thermal modeling, LTI systems are often sufficient for:
-- Small temperature ranges where nonlinear effects are minimal
+- Fundamentally linear and time-invariant systems, or for small temperature ranges where nonlinear effects are minimal
 - Building operation under normal conditions
 - Short to medium-term predictions
 
@@ -105,35 +103,6 @@ The choice of model order involves a tradeoff between:
 - Accuracy and ability to capture complex dynamics (higher order)
 
 In our example, we compare first-order and second-order models to evaluate this tradeoff.
-
-## Thermal Modeling in Buildings
-
-Buildings are complex thermal systems affected by:
-
-1. **External factors**:
-   - Outdoor temperature
-   - Solar radiation
-   - Wind speed
-   - Humidity
-
-2. **Internal factors**:
-   - HVAC systems
-   - Occupancy
-   - Equipment heat gains
-   - Lighting
-
-3. **Building properties**:
-   - Thermal mass
-   - Insulation
-   - Air infiltration
-   - Window properties
-
-Thermal models help us:
-- Predict building temperature response
-- Optimize HVAC control strategies
-- Reduce energy consumption
-- Improve thermal comfort
-- Detect system faults
 
 ## Step-by-Step Code Walkthrough
 
