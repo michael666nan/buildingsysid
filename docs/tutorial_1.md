@@ -157,9 +157,7 @@ import pandas as pd
 - `pandas` is used for data handling and manipulation
 
 
-### Step 2: Loading and Preparing Data
-
-### Step 2: Loading and Preparing Data
+### Step 3: Loading and Preparing Data
 
 ```python
 # Read the CSV file with time stamps
@@ -167,8 +165,8 @@ df = pd.read_csv('heavyweight_room_prbs.csv', index_col='time_stamp', parse_date
 
 # Extract a specific time period for the analysis
 # For example, selecting data from January to March
-start_date = '2019-01-01 00:00:00'
-end_date = '2019-03-31 23:59:59'
+start_date = '2023-01-01'
+end_date = '2023-01-31'
 df = df.loc[start_date:end_date]
 
 # Get the timestamps for later use
@@ -196,7 +194,7 @@ input_data = df[input_names].to_numpy().T
 - Setting `parse_dates=True` ensures timestamps are properly converted to datetime objects
 - The data is organized in time series with inputs that affect the building temperature
 
-### Step 2: Creating the Identification Data Object
+### Step 4: Creating the Identification Data Object
 
 ```python
 sampling_time = 60   # 60 seconds (1 minute)
@@ -218,7 +216,7 @@ data = bid.IDData(
 - This structured format makes subsequent analysis more efficient
 - The sampling time (60 seconds) represents the time between consecutive measurements
 
-### Step 3: Resampling Data
+### Step 5: Resampling Data
 
 ```python
 model_sampling_time = 3600  # seconds (1 hour)
@@ -239,23 +237,44 @@ data_resampled = data.resample(
   - "first" for outputs means we take the temperature at the beginning of each hour
   - "mean" for inputs averages the driving forces over the hour
 
-### Step 4: Splitting Data
+### Step 6: Splitting Data
 
 ```python
+# Split data - 70% for training, 30% for validation
 train, val = data_resampled.split(train_ratio=0.7)
+```
+
+**Explanation:**
+- We use 70% of data for training and 30% for validation
+- This is a common split ratio for system identification
+- Training data is used to estimate model parameters
+- Validation data is kept separate to evaluate model performance
+
+### Step 7: Data Inspection and Visualization
+
+```python
+# Visualize the training data
 train.plot_timeseries(title="Training Data")
+
+# Visualize the validation data
 val.plot_timeseries(title="Validation Data")
+
+# Analyze correlations in the data
 train.plot_cross_correlation()
 train.plot_partial_cross_correlation()
 ```
 
 **Explanation:**
-- We use 70% of data for training and 30% for validation
 - Plotting the time series helps visualize the data and check for anomalies
+- Inspecting both training and validation sets ensures they capture similar dynamics
 - Cross-correlation plots show how inputs affect outputs over time
+  - They help identify which inputs have the strongest influence
+  - They reveal time delays between inputs and outputs
 - Partial cross-correlation shows direct relationships after removing indirect effects
+  - This helps identify the most important predictors
+  - It can guide model structure selection
 
-### Step 5: Defining Model Structure
+### Step 8: Defining Model Structure
 
 ```python
 black1 = bid.model_set.black.First()   # first-order model
@@ -269,69 +288,156 @@ black2 = bid.model_set.black.Second()   # second-order model
 - These are "black-box" models because we don't impose physical structure
 - The library handles the mathematical formulation internally
 
-### Step 6 & 7: Defining Prediction Objective and Solver
+### Step 8: Defining Prediction Objective
 
 ```python
+# Define one-step-ahead prediction as our objective
 onestep_pred = bid.criterion_of_fit.StandardObjective(kstep=1)
+```
+
+**Explanation:**
+- `StandardObjective` defines what error we want to minimize
+- `kstep=1` specifies one-step-ahead prediction as our objective
+- This means we want to predict the next time step given current data
+- One-step prediction is often used for parameter estimation because it's mathematically convenient
+- Other values (kstep=12, None) could be used for multi-step or simulation objectives
+
+### Step 9: Configuring the Optimization Solver
+
+```python
+# Configure the least squares solver
 ls_solver = bid.calculate.LeastSquaresSolver(
-    method='trf',
-    verbose=2,
-    ftol=1e-6
+    method='trf',    # Trust Region Reflective algorithm
+    verbose=2,       # Show detailed output during optimization
+    ftol=1e-6        # Function tolerance for convergence
 )
 ```
 
 **Explanation:**
-- `kstep=1` specifies one-step-ahead prediction as our objective
 - The least squares solver finds parameters that minimize prediction errors
-- `method='trf'` uses the Trust Region Reflective algorithm
-- `ftol=1e-6` sets the function tolerance for convergence
+- `method='trf'` uses the Trust Region Reflective algorithm, which is efficient for constrained problems
+- `verbose=2` provides detailed output to monitor the optimization progress
+- `ftol=1e-6` sets the function tolerance for convergence (when to stop the optimization)
 
-### Step 8 & 9: Setting Up and Solving the Optimization Problem
+### Step 10: Setting Up the Optimization Problem
 
 ```python
+# Configure the first-order model optimization
 opt_problem1 = bid.calculate.OptimizationManager(
-    model_structure=black1,
-    data=train,
-    objective=onestep_pred,
-    solver=ls_solver
+    model_structure=black1,    # The first-order model structure
+    data=train,                # Training data
+    objective=onestep_pred,    # Prediction objective
+    solver=ls_solver           # Optimization solver
 )    
 
-black1_opt = opt_problem1.solve(
-    initialization_strategies=["black_box"]
+# Configure the second-order model optimization (similar process)
+opt_problem2 = bid.calculate.OptimizationManager(
+    model_structure=black2,    # The second-order model structure 
+    data=train,                # Training data
+    objective=onestep_pred,    # Same prediction objective
+    solver=ls_solver           # Same optimization solver
 )
 ```
 
 **Explanation:**
-- `OptimizationManager` combines model, data, objective, and solver
-- The `solve()` method trains the model by finding optimal parameters
-- `initialization_strategies=["black_box"]` uses starting values suitable for building systems
-- A similar process is repeated for the second-order model
+- `OptimizationManager` combines model, data, objective, and solver into a complete problem
+- We create separate optimization problems for each model structure
+- Both problems use the same training data, objective function, and solver
+- This setup allows us to compare different model orders with consistent methodology
 
-### Step 10-13: Analyzing Results and Validation
+### Step 11: Solving the Optimization Problem (Training the Models)
 
 ```python
+# Train the first-order model
+black1_opt = opt_problem1.solve(
+    initialization_strategies=["black_box"]  # Start with values typical for building systems
+)
+
+# Train the second-order model
+black2_opt = opt_problem2.solve(
+    initialization_strategies=["black_box"]  # Same initialization strategy
+)
+```
+
+**Explanation:**
+- The `solve()` method trains the model by finding optimal parameters
+- `initialization_strategies=["black_box"]` uses starting values suitable for building thermal systems
+- The solver iteratively adjusts parameters to minimize the objective function
+- This process is repeated for both model structures
+- The optimization results contain the best-fit parameters and additional information
+
+### Step 12: Analyzing Model Parameters
+
+```python
+# Display estimated parameters and confidence intervals for both models
+print("First-order model parameters:")
 black1_opt.print()
+
+print("Second-order model parameters:")
+black2_opt.print()
+
+# Convert optimized models to state-space form
 ss1 = black1_opt.get_state_space()
 ss2 = black2_opt.get_state_space()
 
-# Validate models
-fit, y_sim = bid.validation.compare(
-    model_list,
-    val,
-    kstep=1,
-    model_names=model_names,
-    title="One-step Predictions"
-)
+# Create a list with models for comparison
+model_list = [ss1, ss2]
+model_names = ["First-order", "Second-order"]
 ```
 
 **Explanation:**
 - `print()` shows the estimated parameters with confidence intervals
-- `get_state_space()` converts the identified model to state-space form
-- Validation compares predictions against actual data
-- Multiple prediction horizons are tested:
-  - One-step (1 hour ahead)
-  - 12-step (12 hours ahead)
-  - Simulation (long-term behavior)
+- Narrow confidence intervals indicate more reliable parameter estimates
+- `get_state_space()` converts the identified model to state-space form for simulation
+- Creating a list of models allows for easy comparison in the validation step
+
+### Step 13: Validating Model Performance
+
+```python
+# Evaluate one-step ahead prediction (short-term forecast)
+fit_1step, y_sim_1step = bid.validation.compare(
+    model_list,                 # The models to compare
+    val,                        # Validation data
+    kstep=1,                    # One-step ahead prediction
+    model_names=model_names,    # For plotting legend
+    title="One-step Predictions"
+)
+
+# Evaluate 12-step ahead prediction (medium-term forecast, 12 hours)
+fit_12step, y_sim_12step = bid.validation.compare(
+    model_list,                 # The models
+    val,                        # Validation data
+    kstep=12,                   # 12-step ahead prediction
+    model_names=model_names,    
+    title="12-step Predictions (12 hours ahead)"
+)
+
+# Evaluate full simulation (long-term behavior)
+fit_sim, y_sim_full = bid.validation.compare(
+    model_list,                     # The models
+    val,                            # Validation data
+    kstep=None,                     # Full simulation (infinite-step)
+    model_names=model_names,
+    title="Full Simulation"
+)
+
+# Display fit metrics for each model and prediction horizon
+print("\nModel performance (fit %):")
+print(f"{'Model':<15} {'1-step':<10} {'12-step':<10} {'Simulation':<10}")
+print("-" * 45)
+for i, name in enumerate(model_names):
+    print(f"{name:<15} {fit_1step[i]:<10.2f} {fit_12step[i]:<10.2f} {fit_sim[i]:<10.2f}")
+```
+
+**Explanation:**
+- Validation compares predictions against actual data on the unseen validation set
+- Multiple prediction horizons are tested to evaluate different aspects:
+  - One-step (1 hour ahead): Tests immediate prediction accuracy
+  - 12-step (12 hours ahead): Tests medium-term forecasting ability
+  - Simulation (infinite-step): Tests long-term behavior stability
+- The fit metric is typically a normalized RMSE, with 100% indicating perfect fit
+- Comparing different model orders shows the tradeoff between complexity and accuracy
+- Typically, fit decreases as prediction horizon increases
 
 ## Prediction Errors and Model Validation
 
@@ -459,14 +565,42 @@ Using identified models for control:
 
 ## Exercises
 
-1. Modify the example to compare different model orders (1st, 2nd, 3rd) and determine the optimal complexity.
+1. **Model Order Comparison**: Modify the example to compare different model orders (1st, 2nd, 3rd, 4th) and determine the optimal complexity using AIC or BIC criteria. Create a plot showing how the fit metrics change with increasing model order.
 
-2. Experiment with different input variables. How does the model performance change if you remove solar gain or add other inputs?
+2. **Input Variable Analysis**: Experiment with different input variable combinations:
+   - Try excluding one input variable at a time (e.g., remove solar gain)
+   - Add derived inputs like temperature difference (indoor-outdoor)
+   - Create a time-lagged input variable
+   - Analyze how each change impacts model accuracy
 
-3. Try different sampling times (30 minutes, 2 hours) and analyze the impact on model accuracy.
+3. **Sampling Time Analysis**: Try different sampling times (30 minutes, 2 hours, 4 hours) and analyze:
+   - Impact on model accuracy for different prediction horizons
+   - Computational efficiency tradeoffs
+   - Ability to capture different dynamics
 
-4. Implement cross-validation to ensure model robustness.
+4. **Cross-Validation Implementation**: Implement k-fold cross-validation to ensure model robustness:
+   - Create a function for k-fold cross-validation
+   - Evaluate model performance across different data segments
+   - Calculate standard deviation of performance metrics
 
-5. Compare the performance of black-box models with grey-box models (if available in the library).
+5. **Error Minimization Comparison**: Compare models trained by minimizing different error types:
+   - One-step prediction error
+   - Multi-step prediction error (e.g., 6-step)
+   - Simulation error
+   - Analyze when each approach performs best
 
-6. Design a Model Predictive Control strategy using the identified model to optimize heating control for energy savings.
+6. **Model Predictive Control Strategy**: Design a basic MPC strategy using the identified model:
+   - Define comfort constraints (temperature limits)
+   - Define a cost function (e.g., energy consumption)
+   - Implement a simple predictive controller
+   - Compare with a baseline rule-based controller
+
+7. **Physical Interpretation**: Try to give physical meaning to the identified state variables:
+   - Analyze the eigenvalues of the A matrix
+   - Compare time constants with known building properties
+   - Visualize state variables over time and correlate with physical phenomena
+
+8. **Data Quality Analysis**: Study the impact of data quality on identification:
+   - Add artificial noise to the data
+   - Create missing data points
+   - See how robust different model orders are to data quality issues
