@@ -130,7 +130,7 @@ heavyweight_room_prbs.csv - Building simulation data from EnergyPlus
 ```
 
 **Where to find the data:**
-- The example data file is available in the GitHub repository: [github.com/michael666nan/buildingsysid/master/tutorial_data/](https://github.com/michael666nan/buildingsysid/master/tutorial_data/)
+- The example data file is available in the GitHub repository: [github.com/michael666nan/buildingsysid/tree/master/tutorial_data/](https://github.com/michael666nan/buildingsysid/tree/master/tutorial_data/)
 - Download this file to your working directory before running the script
 - Alternatively, you can use the following command to download it directly from GitHub:
 
