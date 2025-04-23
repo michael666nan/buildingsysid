@@ -5,12 +5,11 @@
 2. [Black-Box Models vs. White-Box Models](#black-box-models-vs-white-box-models)
 3. [Linear Time-Invariant (LTI) Systems](#linear-time-invariant-lti-systems)
 4. [State-Space Models](#state-space-models)
-5. [Thermal Modeling in Buildings](#thermal-modeling-in-buildings)
-6. [Step-by-Step Code Walkthrough](#step-by-step-code-walkthrough)
-7. [Model Validation Techniques](#model-validation-techniques)
-8. [Practical Considerations](#practical-considerations)
-9. [Advanced Topics](#advanced-topics)
-10. [Exercises](#exercises)
+5. [Step-by-Step Code Walkthrough](#step-by-step-code-walkthrough)
+6. [Model Validation Techniques](#model-validation-techniques)
+7. [Practical Considerations](#practical-considerations)
+8. [Advanced Topics](#advanced-topics)
+9. [Exercises](#exercises)
 
 ## Introduction to System Identification
 
@@ -138,7 +137,7 @@ heavyweight_room_prbs.csv - Building simulation data from EnergyPlus
 ```python
 # Optional: Download example data directly (uncomment and adjust URL as needed)
 # import requests
-# url = "https://raw.githubusercontent.com/YourUsername/buildingsysid/main/tutorial_data/heavyweight_room_prbs.csv"
+# url = "https://raw.githubusercontent.com/michael666nan/buildingsysid/main/tutorial_data/heavyweight_room_prbs.csv"
 # with open("heavyweight_room_prbs.csv", "wb") as f:
 #     f.write(requests.get(url).content)
 ```
