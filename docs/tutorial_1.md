@@ -108,16 +108,79 @@ In our example, we compare first-order and second-order models to evaluate this 
 
 Let's examine each section of the provided example code:
 
-### Step 1: Loading and Preparing Data
+### Step 0: Installation (Before Running the Script)
+
+Before using the `buildingsysid` library, you need to install it:
+
+```bash
+# Install the library if you haven't done so
+pip install buildingsysid
+```
+
+**Explanation:**
+- This step is performed once in your environment, not as part of the script
+- You may want to use a virtual environment to manage dependencies
+- Check the library documentation for specific version requirements
+
+### Step 1: Accessing Example Data
+
+You'll need to download the example data file used in this tutorial:
+
+```
+heavyweight_room_prbs.csv - Building simulation data from EnergyPlus
+```
+
+**Where to find the data:**
+- The example data file is available in the GitHub repository: [github.com/YourUsername/buildingsysid/tutorial_data/](https://github.com/YourUsername/buildingsysid/examples/data/)
+- Download this file to your working directory before running the script
+- Alternatively, you can use the following command to download it directly from GitHub:
 
 ```python
-df = pd.read_csv('eplus_example1.csv', index_col='time_stamp', parse_dates=True) 
+# Optional: Download example data directly (uncomment and adjust URL as needed)
+# import requests
+# url = "https://raw.githubusercontent.com/YourUsername/buildingsysid/main/tutorial_data/heavyweight_room_prbs.csv"
+# with open("heavyweight_room_prbs.csv", "wb") as f:
+#     f.write(requests.get(url).content)
+```
+
+### Step 2: Importing Required Libraries
+
+First, import the necessary libraries for the analysis:
+
+```python
+# Import the necessary libraries
+import buildingsysid as bid
+import pandas as pd
+```
+
+**Explanation:**
+- The `buildingsysid` library provides tools for system identification in building applications
+- `pandas` is used for data handling and manipulation
+
+
+### Step 2: Loading and Preparing Data
+
+### Step 2: Loading and Preparing Data
+
+```python
+# Read the CSV file with time stamps
+df = pd.read_csv('heavyweight_room_prbs.csv', index_col='time_stamp', parse_dates=True) 
+
+# Extract a specific time period for the analysis
+# For example, selecting data from January to March
+start_date = '2019-01-01 00:00:00'
+end_date = '2019-03-31 23:59:59'
+df = df.loc[start_date:end_date]
+
+# Get the timestamps for later use
 timestamps = df.index
 
+# Define output variable (what we want to predict)
 output_name = ["Indoor Temp"]                
 output_unit = ["°C"]                     
 output_data = df[output_name].to_numpy().T                  
 
+# Define input variables (what drives the system)
 input_names = ["Outdoor Temp", "Solar Gain", "Heat Power"]  
 input_units = ["°C", "W/m²", "W"]                        
 input_data = df[input_names].to_numpy().T                   
@@ -127,7 +190,12 @@ input_data = df[input_names].to_numpy().T
 - The data comes from an EnergyPlus simulation, which is a common building energy simulation software
 - We define what we want to predict (output) - indoor temperature
 - We define what drives the system (inputs) - outdoor temperature, solar gain, and heating power
+- **Time period selection**: We extract a specific time window from the dataset to focus our analysis
+  - This is useful for analyzing seasonal effects or focusing on specific periods of interest
+  - You can adjust the start_date and end_date to select different periods
 - The `.T` operation transposes the arrays to match the expected format for the library
+- Setting `parse_dates=True` ensures timestamps are properly converted to datetime objects
+- The data is organized in time series with inputs that affect the building temperature
 
 ### Step 2: Creating the Identification Data Object
 

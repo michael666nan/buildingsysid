@@ -1,5 +1,6 @@
-LICENSE
+LICENSE.txt
 README.md
+pyproject.toml
 setup.py
 buildingsysid/__init__.py
 buildingsysid.egg-info/PKG-INFO

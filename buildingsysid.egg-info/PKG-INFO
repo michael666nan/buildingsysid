@@ -1,21 +1,23 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: buildingsysid
 Version: 0.1.1
 Summary: System identification tools for building models
-Home-page: https://github.com/michael666nan/buildingsysid
-Author: Michael Dahl Knudsen
-Author-email: mdk@cae.au.dk
+Author-email: Michael Dahl Knudsen <mdk@cae.au.dk>
+License: MIT
+Project-URL: Homepage, https://github.com/michael666nan/buildingsysid
+Project-URL: Bug Tracker, https://github.com/michael666nan/buildingsysid/issues
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.7
 Description-Content-Type: text/markdown
-License-File: LICENSE
+License-File: LICENSE.txt
 Requires-Dist: numpy
 Requires-Dist: pandas
 Requires-Dist: matplotlib
 Requires-Dist: scipy
 Requires-Dist: statsmodels
+Dynamic: license-file
 
 # Building System Identification
 
