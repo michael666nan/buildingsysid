@@ -197,6 +197,7 @@ input_data = df[input_names].to_numpy().T
 ### Step 4: Creating the Identification Data Object
 
 ```python
+# Create IDData
 sampling_time = 60   # 60 seconds (1 minute)
 data = bid.IDData(
        y=output_data,              # Output data (indoor temperature)
@@ -219,6 +220,7 @@ data = bid.IDData(
 ### Step 5: Resampling Data
 
 ```python
+# Resample data
 model_sampling_time = 3600  # seconds (1 hour)
 data_resampled = data.resample(
     new_sampling_time=model_sampling_time,
@@ -277,6 +279,7 @@ train.plot_partial_cross_correlation()
 ### Step 8: Defining Model Structure
 
 ```python
+# Define models structures
 black1 = bid.model_set.black.First()   # first-order model
 black2 = bid.model_set.black.Second()   # second-order model
 ```
@@ -416,7 +419,6 @@ fit_12step, y_sim_12step = bid.validation.compare(
 fit_sim, y_sim_full = bid.validation.compare(
     model_list,                     # The models
     val,                            # Validation data
-    kstep=None,                     # Full simulation (infinite-step)
     model_names=model_names,
     title="Full Simulation"
 )
