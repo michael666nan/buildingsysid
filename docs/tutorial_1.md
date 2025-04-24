@@ -6,22 +6,21 @@
 3. [Linear Time-Invariant (LTI) Systems](#linear-time-invariant-lti-systems)
 4. [State-Space Models](#state-space-models)
 5. [Step-by-Step Code Walkthrough](#step-by-step-code-walkthrough)
-6. [Model Validation Techniques](#model-validation-techniques)
+6. [Prediction Errors and Model Validation](#prediction-errors-and-model-validation)
 7. [Practical Considerations](#practical-considerations)
 8. [Advanced Topics](#advanced-topics)
 9. [Exercises](#exercises)
 
 ## Introduction to System Identification
 
-System identification is the process of developing mathematical models of dynamic systems based on observed input and output data.
+System identification is the process of developing mathematical models of dynamic systems based on observed input and output data. This tutorial demonstrates how to apply these techniques to building thermal modeling.
 
 ### Key Concepts:
 
-- **System**: In this example an EnergyPlus model of a single room is the underlying unknown process that generates the data 
+- **System**: In this example, an EnergyPlus model of a single room is the underlying unknown process that generates the data 
 - **Model**: A linear time-invariant state-space model is the mathematical representation we use to describe the system's behavior
 - **Identification**: The process of determining model parameters from data
 - **Validation**: Testing if the model accurately predicts system behavior
-
 
 ## Black-Box Models vs. White-Box and Grey-Box Models
 
@@ -112,7 +111,7 @@ Let's examine each section of the provided example code:
 Before using the `buildingsysid` library, you need to install it:
 
 ```bash
-# Install the library if you haven't done so
+# Install the library
 pip install buildingsysid
 ```
 
@@ -135,11 +134,23 @@ heavyweight_room_prbs.csv - Building simulation data from EnergyPlus
 - Alternatively, you can use the following command to download it directly from GitHub:
 
 ```python
-# Optional: Download example data directly (uncomment and adjust URL as needed)
-# import requests
-# url = "https://raw.githubusercontent.com/michael666nan/buildingsysid/master/tutorial_data/heavyweight_room_prbs.csv"
-# with open("heavyweight_room_prbs.csv", "wb") as f:
-#     f.write(requests.get(url).content)
+# Optional: Download example data directly
+import requests
+
+# Use the RAW GitHub URL for direct file access
+url = "https://raw.githubusercontent.com/michael666nan/buildingsysid/master/tutorial_data/heavyweight_room_prbs.csv"
+
+# Download and save the file
+try:
+    response = requests.get(url)
+    response.raise_for_status()  # Check for HTTP errors
+    
+    with open("heavyweight_room_prbs.csv", "wb") as f:
+        f.write(response.content)
+    
+    print("Example data downloaded successfully!")
+except Exception as e:
+    print(f"Error downloading file: {e}")
 ```
 
 ### Step 2: Importing Required Libraries
@@ -150,12 +161,15 @@ First, import the necessary libraries for the analysis:
 # Import the necessary libraries
 import buildingsysid as bid
 import pandas as pd
+import matplotlib.pyplot as plt  # For visualization
+import numpy as np  # For numerical operations
 ```
 
 **Explanation:**
 - The `buildingsysid` library provides tools for system identification in building applications
 - `pandas` is used for data handling and manipulation
-
+- `matplotlib` for visualizing results and data inspection
+- `numpy` for numerical calculations when needed
 
 ### Step 3: Loading and Preparing Data
 
@@ -164,7 +178,7 @@ import pandas as pd
 df = pd.read_csv('heavyweight_room_prbs.csv', index_col='time_stamp', parse_dates=True) 
 
 # Extract a specific time period for the analysis
-# For example, selecting data from January to March
+# For example, selecting data from January
 start_date = '2023-01-01'
 end_date = '2023-01-31'
 df = df.loc[start_date:end_date]
@@ -263,7 +277,6 @@ val.plot_timeseries(title="Validation Data")
 
 # Analyze correlations in the data
 train.plot_cross_correlation()
-train.plot_partial_cross_correlation()
 ```
 
 **Explanation:**
@@ -272,9 +285,6 @@ train.plot_partial_cross_correlation()
 - Cross-correlation plots show how inputs affect outputs over time
   - They help identify which inputs have the strongest influence
   - They reveal time delays between inputs and outputs
-- Partial cross-correlation shows direct relationships after removing indirect effects
-  - This helps identify the most important predictors
-  - It can guide model structure selection
 
 ### Step 8: Defining Model Structure
 
@@ -291,7 +301,7 @@ black2 = bid.model_set.black.Second()   # second-order model
 - These are "black-box" models because we don't impose physical structure
 - The library handles the mathematical formulation internally
 
-### Step 8: Defining Prediction Objective
+### Step 9: Defining Prediction Objective
 
 ```python
 # Define one-step-ahead prediction as our objective
@@ -303,9 +313,10 @@ onestep_pred = bid.criterion_of_fit.StandardObjective(kstep=1)
 - `kstep=1` specifies one-step-ahead prediction as our objective
 - This means we want to predict the next time step given current data
 - One-step prediction is often used for parameter estimation because it's mathematically convenient
-- Other values (kstep=12, None) could be used for multi-step or simulation objectives
+- Other values could be used for multi-step (e.g. kstep=12)
+- Skip the kstep argument for simulation objective
 
-### Step 9: Configuring the Optimization Solver
+### Step 10: Configuring the Optimization Solver
 
 ```python
 # Configure the least squares solver
@@ -322,7 +333,7 @@ ls_solver = bid.calculate.LeastSquaresSolver(
 - `verbose=2` provides detailed output to monitor the optimization progress
 - `ftol=1e-6` sets the function tolerance for convergence (when to stop the optimization)
 
-### Step 10: Setting Up the Optimization Problem
+### Step 11: Setting Up the Optimization Problem
 
 ```python
 # Configure the first-order model optimization
@@ -348,7 +359,7 @@ opt_problem2 = bid.calculate.OptimizationManager(
 - Both problems use the same training data, objective function, and solver
 - This setup allows us to compare different model orders with consistent methodology
 
-### Step 11: Solving the Optimization Problem (Training the Models)
+### Step 12: Solving the Optimization Problem (Training the Models)
 
 ```python
 # Train the first-order model
@@ -369,7 +380,7 @@ black2_opt = opt_problem2.solve(
 - This process is repeated for both model structures
 - The optimization results contain the best-fit parameters and additional information
 
-### Step 12: Analyzing Model Parameters
+### Step 13: Analyzing Model Parameters
 
 ```python
 # Display estimated parameters and confidence intervals for both models
@@ -394,7 +405,7 @@ model_names = ["First-order", "Second-order"]
 - `get_state_space()` converts the identified model to state-space form for simulation
 - Creating a list of models allows for easy comparison in the validation step
 
-### Step 13: Validating Model Performance
+### Step 14: Validating Model Performance
 
 ```python
 # Evaluate one-step ahead prediction (short-term forecast)
@@ -440,6 +451,23 @@ for i, name in enumerate(model_names):
 - The fit metric is typically a normalized RMSE, with 100% indicating perfect fit
 - Comparing different model orders shows the tradeoff between complexity and accuracy
 - Typically, fit decreases as prediction horizon increases
+
+### Step 15: Saving Models for Future Use
+
+```python
+# Save models to files for later use
+ss1.save("first_order")
+ss2.save("second_order")
+
+print("Models saved successfully!")
+```
+
+**Explanation:**
+- The `save()` method stores the identified model to disk
+- Saved models can be loaded later for predictions or control applications
+- This allows you to identify models once and reuse them many times
+- Models are saved with their complete structure and parameters
+- You can load these models later using `bid.load_model("model_name")`
 
 ## Prediction Errors and Model Validation
 
@@ -569,40 +597,20 @@ Using identified models for control:
 
 1. **Model Order Comparison**: Modify the example to compare different model orders (1st, 2nd, 3rd, 4th) and determine the optimal complexity using AIC or BIC criteria. Create a plot showing how the fit metrics change with increasing model order.
 
-2. **Input Variable Analysis**: Experiment with different input variable combinations:
-   - Try excluding one input variable at a time (e.g., remove solar gain)
-   - Add derived inputs like temperature difference (indoor-outdoor)
-   - Create a time-lagged input variable
-   - Analyze how each change impacts model accuracy
-
-3. **Sampling Time Analysis**: Try different sampling times (30 minutes, 2 hours, 4 hours) and analyze:
+2. **Sampling Time Analysis**: Try different sampling times (15 minutes, 30 minutes, 1 hour) and analyze:
    - Impact on model accuracy for different prediction horizons
    - Computational efficiency tradeoffs
    - Ability to capture different dynamics
 
-4. **Cross-Validation Implementation**: Implement k-fold cross-validation to ensure model robustness:
-   - Create a function for k-fold cross-validation
-   - Evaluate model performance across different data segments
-   - Calculate standard deviation of performance metrics
-
-5. **Error Minimization Comparison**: Compare models trained by minimizing different error types:
+3. **Error Minimization Comparison**: Compare models trained by minimizing different error types:
    - One-step prediction error
    - Multi-step prediction error (e.g., 6-step)
    - Simulation error
-   - Analyze when each approach performs best
-
-6. **Model Predictive Control Strategy**: Design a basic MPC strategy using the identified model:
-   - Define comfort constraints (temperature limits)
-   - Define a cost function (e.g., energy consumption)
-   - Implement a simple predictive controller
-   - Compare with a baseline rule-based controller
-
-7. **Physical Interpretation**: Try to give physical meaning to the identified state variables:
-   - Analyze the eigenvalues of the A matrix
-   - Compare time constants with known building properties
-   - Visualize state variables over time and correlate with physical phenomena
-
-8. **Data Quality Analysis**: Study the impact of data quality on identification:
-   - Add artificial noise to the data
-   - Create missing data points
-   - See how robust different model orders are to data quality issues
+   - Multi-step prediction error summed over the prediction horizon
+       In this case you need to specify the argument sum_hor=True
+       
+4. **Level of Excitation**: Use data with less excitation and feedback:
+   - Use the example data file 'heavyweight_room_bounded_setpoint.csv' available in the GitHub repository: [github.com/michael666nan/buildingsysid/tree/master/tutorial_data/](https://github.com/michael666nan/buildingsysid/tree/master/tutorial_data/)
+   - This data is generated by the same EnergyPlus model, but with a PI-controller and comfort bounded setpoints
+   - Inspect the data to assess the data quality
+   - Train models and assess performance

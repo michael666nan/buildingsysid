@@ -124,7 +124,7 @@ class Second(BaseBlackBox):
 # Third Order - Observable Canonical
 #================================================================= 
 class Third(BaseBlackBox):
-    def __init__(self, fixed_params={}, fixed_bounds={}):
+    def __init__(self, fixed_params={}, param_bounds={}):
         super().__init__()
         
         # Define total parameters and state dimensions

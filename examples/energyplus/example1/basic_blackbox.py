@@ -229,7 +229,7 @@ residuals = val.y - y_sim
 # =====================================================================
 print("Step 13: Saving model for future use...")
 # # Uncomment the line below to save models
-# ss1.save("first_order")
-# ss2.save("second_order")
+ss1.save("first_order")
+ss2.save("second_order")
 
 print("\nBlack-box system identification completed successfully!")
