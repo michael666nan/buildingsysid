@@ -125,7 +125,7 @@ pip install buildingsysid
 You'll need to download the example data file used in this tutorial:
 
 ```
-heavyweight_room_prbs.csv - Building simulation data from EnergyPlus
+Eplus_Project_Room_prbs.csv - Building simulation data from EnergyPlus
 ```
 
 **Where to find the data:**
@@ -138,14 +138,14 @@ heavyweight_room_prbs.csv - Building simulation data from EnergyPlus
 import requests
 
 # Use the RAW GitHub URL for direct file access
-url = "https://raw.githubusercontent.com/michael666nan/buildingsysid/master/tutorial_data/heavyweight_room_prbs.csv"
+url = "https://raw.githubusercontent.com/michael666nan/buildingsysid/master/tutorial_data/Eplus_Project_Room_prbs.csv"
 
 # Download and save the file
 try:
     response = requests.get(url)
     response.raise_for_status()  # Check for HTTP errors
     
-    with open("heavyweight_room_prbs.csv", "wb") as f:
+    with open("Eplus_Project_Room_prbs.csv", "wb") as f:
         f.write(response.content)
     
     print("Example data downloaded successfully!")
@@ -175,7 +175,7 @@ import numpy as np  # For numerical operations
 
 ```python
 # Read the CSV file with time stamps
-df = pd.read_csv('heavyweight_room_prbs.csv', index_col='time_stamp', parse_dates=True) 
+df = pd.read_csv('Eplus_Project_Room_prbs.csv', index_col='time_stamp', parse_dates=True) 
 
 # Extract a specific time period for the analysis
 # For example, selecting data from January

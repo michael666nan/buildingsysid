@@ -4,31 +4,41 @@ from scipy.optimize import least_squares
 
 class LeastSquaresSolver:
     """
-    A class-based implementation of the least squares solver with
-    support for confidence interval calculation and robust optimization.
+    A least squares solver with support for confidence interval calculation and robust optimization.  
+        
+    Args:
+        method: 
+            Optimization method - 'trf', 'dogbox', or 'lm' (default: 'trf')
+        verbose: 
+            Level of verbosity (0=silent, 1=normal, 2=detailed) (default: 0)
+        calc_confidence: 
+            Whether to calculate confidence intervals (default: True)            
+        ftol: 
+            Tolerance for termination by change of cost function (default: 1e-8)
+        xtol: 
+            Tolerance for termination by change of the independent variables (default: 1e-8)
+        gtol: 
+            Tolerance for termination by the norm of the gradient (default: 1e-8)
+        x_scale: 
+            Characteristic scale of each variable (default: 1.0)
+        loss: 
+            Loss function to use (default: 'linear')
+        f_scale: 
+            Value of soft margin between inlier and outlier residuals (default: 1.0)
+        max_nfev: 
+            Maximum number of function evaluations (default: None)
+        diff_step: 
+            Step size for numerical differentiation (default: None)
+        tr_solver: 
+            Method to solve trust-region subproblems (default: None)
+        tr_options: 
+            Options for trust-region solver (default: None)
+        jac_sparsity: 
+            Sparsity structure of the Jacobian (default: None)
     """
     
     def __init__(self, method='trf', verbose=0, calc_confidence=True, **options):
-        """
-        Initialize the solver with configuration options.
-        
-        Args:
-            method: Optimization method - 'trf', 'dogbox', or 'lm' (default: 'trf')
-            verbose: Level of verbosity (0=silent, 1=normal, 2=detailed) (default: 0)
-            calc_confidence: Whether to calculate confidence intervals (default: True)
-            **options: Additional options to pass to scipy.optimize.least_squares, such as:
-                - ftol: Tolerance for termination by change of cost function (default: 1e-8)
-                - xtol: Tolerance for termination by change of the independent variables (default: 1e-8)
-                - gtol: Tolerance for termination by the norm of the gradient (default: 1e-8)
-                - x_scale: Characteristic scale of each variable (default: 1.0)
-                - loss: Loss function to use (default: 'linear')
-                - f_scale: Value of soft margin between inlier and outlier residuals (default: 1.0)
-                - max_nfev: Maximum number of function evaluations (default: None)
-                - diff_step: Step size for numerical differentiation (default: None)
-                - tr_solver: Method to solve trust-region subproblems (default: None)
-                - tr_options: Options for trust-region solver (default: None)
-                - jac_sparsity: Sparsity structure of the Jacobian (default: None)
-        """
+
         self.method = method
         self.verbose = verbose
         self.calc_confidence = calc_confidence
@@ -40,9 +50,12 @@ class LeastSquaresSolver:
         Solve the optimization problem using scipy's least_squares.
         
         Args:
-            objective_fn: Function that calculates residuals
-            x0: Initial parameter values
-            bounds: Tuple of (lower_bounds, upper_bounds)
+            objective_fn: 
+                Function that calculates residuals
+            x0: 
+                Initial parameter values
+            bounds: 
+                Tuple of (lower_bounds, upper_bounds)
             
         Returns:
             Result from the least_squares optimization

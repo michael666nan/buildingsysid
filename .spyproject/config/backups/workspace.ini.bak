@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['examples\\energyplus\\example1\\basic_greybox.py', 'examples\\energyplus\\example1\\basic_blackbox.py', 'examples\\proxy_data_experiment\\greybox_estimation.py', 'buildingsysid\\model_set\\grey\\base_greybox.py', 'buildingsysid\\model_set\\grey\\predefined.py', 'buildingsysid\\data\\iddata_timeseriesplot.py', 'buildingsysid\\data\\iddata_correlation.py', 'examples\\energyplus\\example1\\constrained_greybox.py', '..\\test_pip\\test.py']
+recent_files = ['..\\..\\..\\test_pip\\test.py', '..\\..\\..\\Users\\au174818\\OneDrive - Aarhus universitet\\Courses\\Mekanik, termodynamik og partielle differentialligninger 2\\KURSUS_2025\\C3 - Systemer af Første Ordens ODE og Højere Ordens ODE\\PYTHON\\solution_5and7.py', '..\\course_project\\si_blackbox.py', 'docs\\tutorial_1.md', 'examples\\energyplus\\example1\\basic_blackbox.py', 'buildingsysid\\__init__.py', 'setup.py', 'buildingsysid\\model_set\\black\\canonical.py', 'buildingsysid\\calculate\\__init__.py', 'LICENSE.txt', 'examples\\energyplus\\course_project\\tutorial_3.py', 'examples\\energyplus\\example1\\basic_greybox.py', 'buildingsysid\\criterion_of_fit\\objective_functions.py', 'buildingsysid\\calculate\\optimization_manager.py', 'buildingsysid\\calculate\\solvers\\least_squares_solver.py', 'buildingsysid\\validation\\compare.py', 'buildingsysid\\utils\\hankel.py', 'buildingsysid\\utils\\simulate_statespace.py']
 
 [main]
 version = 0.2.0

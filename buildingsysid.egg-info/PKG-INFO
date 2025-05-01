@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: buildingsysid
-Version: 0.1.1
+Version: 0.1.4
 Summary: System identification tools for building models
 Author-email: Michael Dahl Knudsen <mdk@cae.au.dk>
 License: MIT

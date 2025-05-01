@@ -7,26 +7,37 @@ from buildingsysid.utils.simulate_statespace import simulation
 from buildingsysid.utils.hankel import hankel
 
 
-def compare(models, iddata, kstep=-1, sum_horizon=False, initial_state="estimate", 
+def compare(models, iddata, kstep=-1, sum_horizon=False, make_plot=True, initial_state="estimate", 
             model_names=None, colors=None, title=None):
     """
     Compare one or multiple state-space models against identification data.
     
     Args:
-        models: Single state-space model or list of models to compare
-        iddata: Identification data object containing inputs and outputs
-        kstep: Prediction horizon for simulation:
-            kstep < 0 --> Simulation
-            kstep = 1 --> one step ahead predictions
+        models (StateSpace): 
+            Single state-space model or list of models to compare
+        iddata (IDData): 
+            Identification data object containing inputs and outputs
+        kstep (int): 
+            Prediction horizon for simulation: 
+            kstep < 0 --> Simulation.
+            kstep = 1 --> one step ahead predictions.
             kstep > 1 --> k step ahead predictions
-        sum_horizon: Whether to summarize over the horizon
-        initial_state: "estimate" to estimate initial states or "zero" for zero initial states
-        model_names: Optional list of names for each model (default: "Model 1", "Model 2", etc.)
-        colors: Optional list of colors for plotting each model
+        sum_horizon (bool): 
+            Whether to summarize over the horizon
+        make_plot (bool):
+            Make a plot or not
+        initial_state (np.array): 
+            "estimate" to estimate initial states or "zero" for zero initial states
+        model_names (str): 
+            Optional list of names for each model (default: "Model 1", "Model 2", etc.)
+        colors: 
+            Optional list of colors for plotting each model
         
     Returns:
-        fits: List of fit percentages for each model (or single value if one model)
-        y_sims: List of simulated outputs for each model (or single array if one model)
+        fits: 
+            List of fit percentages for each model (or single value if one model)
+        y_sims: 
+            List of simulated outputs for each model (or single array if one model)
     """
     
     # Convert single model to list for consistent handling
@@ -54,7 +65,7 @@ def compare(models, iddata, kstep=-1, sum_horizon=False, initial_state="estimate
     
     # Calculate measured output transformation for fit calculation
     if sum_horizon:
-        Y = hankel(iddata.y, kstep)
+        Y = hankel(kstep, iddata.y,)
         y_mea = Y.T.flatten().reshape((1,-1))
     else:
         y_mea = iddata.y
@@ -70,7 +81,7 @@ def compare(models, iddata, kstep=-1, sum_horizon=False, initial_state="estimate
         
         # Estimate initial state if requested
         if initial_state == "estimate":
-            ss.x0 = estimate_initial_state(ss, iddata, kstep=1)
+            ss.x0 = estimate_initial_state(ss, iddata, kstep=kstep)
         
         # Simulate the model
         y_sim = simulation(ss, iddata, kstep=kstep, sum_horizon=sum_horizon)
@@ -83,52 +94,53 @@ def compare(models, iddata, kstep=-1, sum_horizon=False, initial_state="estimate
         fit = 100 * (1 - num / den)
         fits.append(fit)
     
-    # Create plot
-    fig, axes = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
-    markersize = 3
-    
-    # Subplot 1: Measured vs. Predicted Indoor Temperature for all models
-    axes[0].plot(iddata.timestamps, iddata.y[0, :], label="Measured Temperature", 
-                 marker=".", markersize=markersize, color='b')
-    
-    # Plot each model's prediction
-    for i, y_sim in enumerate(y_sims):
-        axes[0].plot(iddata.timestamps, y_sim[0, :], 
-                     label=f"{model_names[i]} ({fits[i]:.2f} %)", 
-                     marker=".", markersize=markersize, linestyle='dashed', 
-                     color=colors[i])
-    
-    axes[0].set_ylabel("Temperature (°C)")
-    axes[0].set_title(f"Measured vs. Predicted Indoor Temperature {(title)}")
-    axes[0].legend()
-    axes[0].grid(True)
-    
-    # Subplot 2: Solar Radiation & Radiator Heat Input (Dual Y-Axis)
-    ax2 = axes[1].twinx()
-    axes[1].step(iddata.timestamps, iddata.u[1, :], label="Solar Radiation", 
-                 where="post", marker=".", markersize=markersize, color='orange')
-    ax2.step(iddata.timestamps, iddata.u[2, :], label="Radiator Heat Input", 
-              where="post", marker=".", markersize=markersize, color='purple')
-    axes[1].set_ylabel("Solar Radiation (W/m²)", color='orange')
-    ax2.set_ylabel("Radiator Heat Input (W)", color='purple')
-    axes[1].set_title("Solar Radiation & Radiator Heat Input")
-    axes[1].grid(True)
-    axes[1].legend(loc='upper left')
-    ax2.legend(loc='upper right')
-    
-    # Subplot 3: Outdoor Temperature
-    axes[2].step(iddata.timestamps, iddata.u[0, :], label="Outdoor Temperature", 
-                 where="post", marker=".", markersize=markersize, color='g')
-    axes[2].set_ylabel("Temperature (°C)")
-    axes[2].set_title("Outdoor Temperature")
-    axes[2].legend()
-    axes[2].grid(True)
-    
-    # Formatting x-axis
-    plt.xlabel("Time")
-    
-    plt.tight_layout()
-    plt.show()
+    if make_plot:
+        # Create plot
+        fig, axes = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+        markersize = 3
+        
+        # Subplot 1: Measured vs. Predicted Indoor Temperature for all models
+        axes[0].plot(iddata.timestamps, iddata.y[0, :], label="Measured Temperature", 
+                     marker=".", markersize=markersize, color='b')
+        
+        # Plot each model's prediction
+        for i, y_sim in enumerate(y_sims):
+            axes[0].plot(iddata.timestamps, y_sim[0, :], 
+                         label=f"{model_names[i]} ({fits[i]:.2f} %)", 
+                         marker=".", markersize=markersize, linestyle='dashed', 
+                         color=colors[i])
+        
+        axes[0].set_ylabel("Temperature (°C)")
+        axes[0].set_title(f"Measured vs. Predicted Indoor Temperature {(title)}")
+        axes[0].legend()
+        axes[0].grid(True)
+        
+        # Subplot 2: Solar Radiation & Radiator Heat Input (Dual Y-Axis)
+        ax2 = axes[1].twinx()
+        axes[1].step(iddata.timestamps, iddata.u[1, :], label="Solar Radiation", 
+                     where="post", marker=".", markersize=markersize, color='orange')
+        ax2.step(iddata.timestamps, iddata.u[2, :], label="Radiator Heat Input", 
+                  where="post", marker=".", markersize=markersize, color='purple')
+        axes[1].set_ylabel("Solar Radiation (W/m²)", color='orange')
+        ax2.set_ylabel("Radiator Heat Input (W)", color='purple')
+        axes[1].set_title("Solar Radiation & Radiator Heat Input")
+        axes[1].grid(True)
+        axes[1].legend(loc='upper left')
+        ax2.legend(loc='upper right')
+        
+        # Subplot 3: Outdoor Temperature
+        axes[2].step(iddata.timestamps, iddata.u[0, :], label="Outdoor Temperature", 
+                     where="post", marker=".", markersize=markersize, color='g')
+        axes[2].set_ylabel("Temperature (°C)")
+        axes[2].set_title("Outdoor Temperature")
+        axes[2].legend()
+        axes[2].grid(True)
+        
+        # Formatting x-axis
+        plt.xlabel("Time")
+        
+        plt.tight_layout()
+        plt.show()
     
     # Return single values if only one model was provided
     if single_model:

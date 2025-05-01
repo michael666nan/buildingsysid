@@ -2,8 +2,10 @@ from setuptools import setup, find_packages
 
 if __name__ == "__main__":
     setup(
-        packages=find_packages(include=['buildingsysid', 'buildingsysid.*'])
-        )
+        # ... other parameters ...
+        packages=find_packages(include=['buildingsysid', 'buildingsysid.*', 'buildingsysid.calculate.*']),
+        include_package_data=True,
+    )
 
 # from setuptools import setup, find_packages
 

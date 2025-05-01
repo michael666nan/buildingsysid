@@ -15,18 +15,19 @@ class OptimizationManager:
     - Setting up the bounds for optimization
     - Preparing the problem for external solvers
     - Handling numerical issues during optimization
+
+    Args:
+        model_structure: 
+            Instance of model structure
+        data: 
+            IdData object with the data to use for identification
+        objective: 
+            ObjectiveFunction instance (if None, it must be set later)
+        solver: 
+            Solver instance (if None, a default LeastSquaresSolver will be created)
     """
     
     def __init__(self, model_structure, data, objective=None, solver=None):
-        """
-        Initialize the optimization problem.
-        
-        Args:
-            model_structure: Instance of model structure
-            data: IdData object with the data to use for identification
-            objective: ObjectiveFunction instance (if None, it must be set later)
-            solver: Solver instance (if None, a default LeastSquaresSolver will be created)
-        """
         
         # Create a working copy of the model structure
         self.model = copy.deepcopy(model_structure)
@@ -260,14 +261,18 @@ class OptimizationManager:
         Solve the optimization problem using the provided solver with robustness.
         
         Args:
-            x0: Initial parameter values (if None, generated automatically)
-            max_attempts: Maximum number of attempts per strategy if the strategy fails
-            initialization_strategies: List of strategies to try.
+            x0: 
+                Initial parameter values (if None, generated automatically)
+            max_attempts: 
+                Maximum number of attempts per strategy if the strategy fails
+            initialization_strategies: 
+                List of strategies to try.
                 Can include: 'random', 'zeros', 'middle', 'perturbed', 'ones', 'biased_random'
                 or numpy arrays of specific initial values.
                 Each strategy will be tried until success or max_attempts is reached.
                 All strategies will be tried regardless of max_attempts.
-            max_rmse: Maximum acceptable RMSE (if None, continues all attempts)
+            max_rmse: 
+                Maximum acceptable RMSE (if None, continues all attempts)
                 Solutions with RMSE below this threshold are considered satisfactory.
             
         Returns:

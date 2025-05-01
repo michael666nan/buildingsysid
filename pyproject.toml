@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "buildingsysid"
-version = "0.1.1"
+version = "0.1.4"
 description = "System identification tools for building models"
 readme = "README.md"
 authors = [{name = "Michael Dahl Knudsen", email = "mdk@cae.au.dk"}]
