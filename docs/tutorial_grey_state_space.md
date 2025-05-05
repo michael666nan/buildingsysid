@@ -16,7 +16,6 @@ This tutorial demonstrates a workflow for building thermal modeling using grey-b
 - [Step 8: Addressing Identifiability Issues](#step-8-addressing-identifiability-issues)
 - [Step 9: Training and Evaluating the Constrained Model](#step-9-training-and-evaluating-the-constrained-model)
 - [Exercises](#exercises)
-- [References](#references)
 
 ## Introduction
 Grey-box modeling combines physical knowledge with data-driven techniques. This approach is particularly useful when you  are interested in learning the values of physical parameters such as heat transfer coefficients, thermal capacities or solar aperture.
